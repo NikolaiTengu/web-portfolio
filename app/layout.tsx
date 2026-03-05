@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// XP-era fonts fallback
+const xpFonts = {
+  tahoma: "--font-tahoma",
+  msGothic: "--font-ms-gothic",
+};
 
 export const metadata: Metadata = {
-  title: "Jumagbas_Portfolio",
-  description: "Portfolio website of Marlowe Ian Jumagbas",
+  title: "Marlowe Ian Jumagbas - Portfolio [Modern Retro]",
+  description: "Modernized retro-inspired portfolio website of Marlowe Ian Jumagbas",
 };
 
 export default function RootLayout({
@@ -24,9 +19,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            :root {
+              --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+              --font-jetbrains: 'JetBrains Mono', 'Monaco', 'Cascadia Code', monospace;
+            }
+          `
+        }} />
+      </head>
+      <body className="font-inter text-primary bg-surface-card">
         {children}
       </body>
     </html>
