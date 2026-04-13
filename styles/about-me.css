@@ -1,0 +1,5 @@
+/* About Me page stylesheet hook for app/about-me/page.tsx */
+
+.about-me-page-root {
+  min-height: 100vh;
+}

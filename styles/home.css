@@ -1,0 +1,5 @@
+/* Home page stylesheet hook for app/page.tsx */
+
+.home-page-root {
+  min-height: 100vh;
+}
