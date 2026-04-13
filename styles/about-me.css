@@ -3,3 +3,46 @@
 .about-me-page-root {
   min-height: 100vh;
 }
+
+.about-me-page-root.gsap-enhanced .reveal-up,
+.about-me-page-root.gsap-enhanced .neon-beat {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.about-me-page-root .highlight-focus {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow, filter;
+  transition: transform 0.26s ease, box-shadow 0.26s ease, filter 0.26s ease;
+}
+
+.about-me-page-root .highlight-focus::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 16%, rgba(255, 255, 255, 0.12) 50%, transparent 84%);
+  transform: translateX(-140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.about-me-page-root .highlight-focus:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35) inset, 0 0 18px rgba(248, 113, 113, 0.28);
+}
+
+.about-me-page-root .highlight-focus:hover::after {
+  opacity: 1;
+  animation: aboutHighlightSweep 620ms ease-out forwards;
+}
+
+@keyframes aboutHighlightSweep {
+  from {
+    transform: translateX(-140%);
+  }
+  to {
+    transform: translateX(140%);
+  }
+}

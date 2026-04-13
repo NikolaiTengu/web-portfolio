@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import '../styles/home.css';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
@@ -31,6 +34,8 @@ import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import WebAssetRoundedIcon from '@mui/icons-material/WebAssetRounded';
 import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const skills = [
   { category: 'Frontend', items: ['Next.js', 'Tailwind CSS', 'Expo', 'React + Vite'] },
@@ -82,9 +87,68 @@ export default function Home() {
   const [activeWindow, setActiveWindow] = useState('home');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [gsapReady, setGsapReady] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  useGSAP(() => {
+    const introTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    introTimeline
+      .from('.js-taskbar', { y: -18, autoAlpha: 0, duration: 0.45 })
+      .from('.js-sidebar', { x: -36, autoAlpha: 0, duration: 0.55 }, '-=0.25')
+      .from('.js-dashboard', { y: 24, autoAlpha: 0, duration: 0.55 }, '-=0.3')
+      .from('.js-footer', { y: 12, autoAlpha: 0, duration: 0.4 }, '-=0.2');
+
+    gsap.utils.toArray<HTMLElement>('.js-highlight').forEach((element) => {
+      gsap.fromTo(
+        element,
+        { autoAlpha: 0, y: 20, scale: 0.985 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.55,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 88%',
+            toggleActions: 'play none none reverse',
+          },
+        },
+      );
+    });
+
+    setGsapReady(true);
+  }, { scope: rootRef });
+
+  useGSAP(() => {
+    gsap.fromTo(
+      '.js-window-content',
+      { autoAlpha: 0, y: 16, filter: 'blur(5px)' },
+      {
+        autoAlpha: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        duration: 0.42,
+        ease: 'power2.out',
+      },
+    );
+
+    gsap.fromTo(
+      '.cyber-nav-item.active',
+      { scale: 0.985, boxShadow: '0 0 0 rgba(239, 68, 68, 0)' },
+      {
+        scale: 1,
+        boxShadow: '0 0 24px rgba(248, 113, 113, 0.42)',
+        duration: 0.45,
+        ease: 'power2.out',
+        clearProps: 'transform',
+      },
+    );
+  }, { scope: rootRef, dependencies: [activeWindow] });
 
   return (
-    <div className="home-page-root min-h-screen font-inter text-sm cyber-grid cyber-scanlines">
+    <div ref={rootRef} className={`home-page-root ${gsapReady ? 'gsap-enhanced' : ''} min-h-screen font-inter text-sm cyber-grid cyber-scanlines`}>
       {/* Modern Retro Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-32 right-48 w-96 h-96 opacity-20 bg-gradient-to-br from-indigo-400 via-purple-400 to-transparent rounded-full blur-3xl glow-primary"></div>
@@ -95,7 +159,7 @@ export default function Home() {
       </div>
 
       {/* Windows 7 Taskbar */}
-      <header className="win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
+      <header className="js-taskbar win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -123,7 +187,7 @@ export default function Home() {
       {/* Main Content Area */}
       <main className="flex-1 flex overflow-hidden">
         {/* Modern Sidebar */}
-        <div className={`fixed md:static inset-y-0 left-0 z-40 w-80 retro-card cyber-sidebar reveal-up reveal-delay-1 transform transition-transform duration-300 ${
+        <div className={`js-sidebar fixed md:static inset-y-0 left-0 z-40 w-80 retro-card cyber-sidebar reveal-up reveal-delay-1 transform transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         } mt-0 md:mt-6 ml-0 md:ml-6 rounded-xl`}>
           <div className="retro-header cyber-sidebar-header text-base font-semibold">
@@ -165,11 +229,11 @@ export default function Home() {
             <div className="mt-8 pt-6 border-t border-red-900/70">
               <div className="text-xs font-semibold text-red-100/90 mb-4 uppercase tracking-wider">Quick Links</div>
               <div className="space-y-2">
-                <a href="mailto:jumagbasmarlowe@gmail.com" className="retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
+                <a href="mailto:jumagbasmarlowe@gmail.com" className="js-highlight highlight-focus retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
                   <EmailRoundedIcon sx={{ fontSize: 16 }} />
                   <span>Email Me</span>
                 </a>
-                <a href="https://github.com/NikolaiTengu" target="_blank" rel="noopener noreferrer" className="retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
+                <a href="https://github.com/NikolaiTengu" target="_blank" rel="noopener noreferrer" className="js-highlight highlight-focus retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
                   <GitHubIcon sx={{ fontSize: 16 }} />
                   <span>GitHub</span>
                 </a>
@@ -189,7 +253,7 @@ export default function Home() {
         {/* Main Content Area */}
         <div className="flex-1 p-4 md:p-6 space-y-6">
           {/* Primary Application Window */}
-          <div className="retro-card cyber-dashboard reveal-up reveal-delay-2 h-[calc(100vh-200px)] md:h-[calc(100vh-160px)] flex flex-col">
+          <div className="js-dashboard retro-card cyber-dashboard reveal-up reveal-delay-2 h-[calc(100vh-200px)] md:h-[calc(100vh-160px)] flex flex-col">
             <div className="retro-header flex justify-between items-center text-base relative">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 bg-white/20 rounded flex items-center justify-center">
@@ -219,7 +283,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="flex-1 p-6 overflow-auto cyber-dashboard-body">
+            <div className="js-window-content flex-1 p-6 overflow-auto cyber-dashboard-body">
               {/* Home Window */}
               {activeWindow === 'home' && (
                 <div className="space-y-8 reveal-up reveal-delay-3">
@@ -271,7 +335,7 @@ export default function Home() {
                           <button
                             key={item.id}
                             onClick={() => setActiveWindow(item.id)}
-                            className="retro-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group"
+                            className="js-highlight highlight-focus retro-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group"
                           >
                             <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform`}>
                               <item.icon sx={{ fontSize: 20 }} />
@@ -390,7 +454,7 @@ export default function Home() {
                   
                   <div className="space-y-6">
                     {projects.map((project, idx) => (
-                      <div key={project.id} className="retro-card overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+                      <div key={project.id} className="js-highlight highlight-focus retro-card overflow-hidden group hover:scale-[1.02] transition-all duration-300">
                         <div className="retro-header flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${
@@ -485,7 +549,7 @@ export default function Home() {
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     {skills.map((skillGroup, idx) => (
-                      <div key={idx} className="retro-card group hover:scale-105 transition-all duration-300">
+                      <div key={idx} className="js-highlight highlight-focus retro-card group hover:scale-105 transition-all duration-300">
                         <div className={`retro-header ${
                           idx === 0 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
                           idx === 1 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
@@ -571,7 +635,7 @@ export default function Home() {
                   <div className="space-y-4 max-w-2xl">
                     <a
                       href="mailto:jumagbasmarlowe@gmail.com"
-                      className="retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <EmailRoundedIcon sx={{ fontSize: 22 }} />
@@ -588,7 +652,7 @@ export default function Home() {
                       href="https://github.com/NikolaiTengu"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <GitHubIcon sx={{ fontSize: 22 }} />
@@ -605,7 +669,7 @@ export default function Home() {
                       href="https://www.linkedin.com/in/marlowe-ian-jumagbas"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <LinkedInIcon sx={{ fontSize: 22 }} />
@@ -639,12 +703,12 @@ export default function Home() {
       </main>
 
       {/* Modern Retro Status Bar */}
-      <footer className="bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-900 px-4 py-3 flex justify-between items-center shadow-2xl border-t border-white/10 relative z-50">
+      <footer className="js-footer bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-900 px-4 py-3 flex justify-between items-center shadow-2xl border-t border-white/10 relative z-50">
         <div className="flex items-center gap-4">
-          <button className="retro-button text-sm px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium shadow-xl">
+          <div className="text-sm px-4 py-2 rounded-lg bg-white/10 border border-white/15 text-white/90 font-medium shadow-inner select-none cursor-default inline-flex items-center">
             <span className="mr-2"><HomeRoundedIcon sx={{ fontSize: 16 }} /></span>
             <span className="font-bold">Home</span>
-          </button>
+          </div>
           <div className="flex items-center gap-2 text-white/90">
             <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse shadow-lg"></div>
             <span className="text-sm font-medium">System Online</span>
@@ -677,7 +741,7 @@ export default function Home() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
           onClick={() => setFullscreenImage(null)}
         >
-          <div className="retro-card max-w-7xl max-h-[95vh] overflow-hidden">
+          <div className="retro-card w-full max-w-6xl max-h-[92vh] overflow-hidden">
             <div className="retro-header flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <ImageRoundedIcon sx={{ fontSize: 20 }} />
@@ -699,11 +763,11 @@ export default function Home() {
               </div>
             </div>
             <div className="cyber-panel-surface p-6">
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200 shadow-inner">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200 shadow-inner h-[68vh] flex items-center justify-center overflow-hidden">
                 <img 
                   src={fullscreenImage} 
                   alt="Project Preview"
-                  className="w-full h-auto max-h-[75vh] object-contain mx-auto block shadow-lg rounded"
+                  className="max-w-full max-h-full object-contain mx-auto block shadow-lg rounded"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
