@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import AboutContent from './components/AboutContent';
 import '../styles/home.css';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -14,7 +15,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CloudRoundedIcon from '@mui/icons-material/CloudRounded';
 import ContactMailRoundedIcon from '@mui/icons-material/ContactMailRounded';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
-import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -71,6 +71,7 @@ const projects = [
 const navItems = [
   { id: 'home', label: 'Home', icon: HomeRoundedIcon, desc: 'Welcome & Overview', color: 'from-blue-500 to-cyan-500' },
   { id: 'about', label: 'About Me', icon: PersonRoundedIcon, desc: 'Background & Education', color: 'from-green-500 to-emerald-500' },
+  { id: 'additional', label: 'Additional Info', icon: NotesRoundedIcon, desc: 'Personal Add-ons', color: 'from-rose-500 to-red-600' },
   { id: 'projects', label: 'Projects', icon: RocketLaunchRoundedIcon, desc: 'My Work & Portfolio', color: 'from-purple-500 to-pink-500' },
   { id: 'skills', label: 'Skills', icon: BoltRoundedIcon, desc: 'Technical Expertise', color: 'from-amber-500 to-orange-500' },
   { id: 'contact', label: 'Contact', icon: ContactMailRoundedIcon, desc: 'Get In Touch', color: 'from-red-500 to-pink-500' },
@@ -78,6 +79,7 @@ const navItems = [
 
 const homeQuickNav = [
   { label: 'About Me', id: 'about', icon: PersonRoundedIcon, color: 'from-green-500 to-emerald-600', desc: 'My story' },
+  { label: 'Additional Info', id: 'additional', icon: NotesRoundedIcon, color: 'from-rose-500 to-red-600', desc: 'More personal info' },
   { label: 'Projects', id: 'projects', icon: RocketLaunchRoundedIcon, color: 'from-blue-500 to-cyan-600', desc: 'Portfolio showcase' },
   { label: 'Skills', id: 'skills', icon: BoltRoundedIcon, color: 'from-purple-500 to-pink-600', desc: 'Tech stack' },
   { label: 'Contact', id: 'contact', icon: ContactMailRoundedIcon, color: 'from-red-500 to-rose-600', desc: 'Get in touch' },
@@ -85,30 +87,62 @@ const homeQuickNav = [
 
 export default function Home() {
   const [activeWindow, setActiveWindow] = useState('home');
+  const [profileModalType, setProfileModalType] = useState<'about' | 'additional' | null>(null);
+  const [profileModalClosing, setProfileModalClosing] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [gsapReady, setGsapReady] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const profileModalTimerRef = useRef<number | null>(null);
+  const ABOUT_MODAL_ANIMATION_MS = 220;
+
+  const openProfileModal = (type: 'about' | 'additional') => {
+    if (profileModalTimerRef.current) {
+      window.clearTimeout(profileModalTimerRef.current);
+      profileModalTimerRef.current = null;
+    }
+
+    setProfileModalClosing(false);
+    setProfileModalType(type);
+    setSidebarOpen(false);
+  };
+
+  const openAboutModal = () => openProfileModal('about');
+  const openAdditionalInfoModal = () => openProfileModal('additional');
+
+  const closeAboutModal = () => {
+    if (!profileModalType || profileModalClosing) {
+      return;
+    }
+
+    setProfileModalClosing(true);
+    profileModalTimerRef.current = window.setTimeout(() => {
+      setProfileModalType(null);
+      setProfileModalClosing(false);
+      profileModalTimerRef.current = null;
+    }, ABOUT_MODAL_ANIMATION_MS);
+  };
 
   useGSAP(() => {
     const introTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     introTimeline
-      .from('.js-taskbar', { y: -18, autoAlpha: 0, duration: 0.45 })
-      .from('.js-sidebar', { x: -36, autoAlpha: 0, duration: 0.55 }, '-=0.25')
-      .from('.js-dashboard', { y: 24, autoAlpha: 0, duration: 0.55 }, '-=0.3')
-      .from('.js-footer', { y: 12, autoAlpha: 0, duration: 0.4 }, '-=0.2');
+      .from('.js-topbar', { y: -18, duration: 0.45, clearProps: 'transform' })
+      .from('.js-sidepanel', { x: -36, duration: 0.55, clearProps: 'transform' }, '-=0.25')
+      .from('.js-mainpanel', { y: 24, duration: 0.55, clearProps: 'transform' }, '-=0.3')
+      .from('.js-bottombar', { y: 12, duration: 0.4, clearProps: 'transform' }, '-=0.2');
 
-    gsap.utils.toArray<HTMLElement>('.js-highlight').forEach((element) => {
+    gsap.utils.toArray<HTMLElement>('.js-animate-item').forEach((element) => {
       gsap.fromTo(
         element,
-        { autoAlpha: 0, y: 20, scale: 0.985 },
+        { y: 20, scale: 0.985 },
         {
-          autoAlpha: 1,
           y: 0,
           scale: 1,
           duration: 0.55,
           ease: 'power2.out',
+          immediateRender: false,
+          clearProps: 'transform',
           scrollTrigger: {
             trigger: element,
             start: 'top 88%',
@@ -123,19 +157,20 @@ export default function Home() {
 
   useGSAP(() => {
     gsap.fromTo(
-      '.js-window-content',
-      { autoAlpha: 0, y: 16, filter: 'blur(5px)' },
+      '.js-content-panel',
+      { y: 16, filter: 'blur(5px)' },
       {
-        autoAlpha: 1,
         y: 0,
         filter: 'blur(0px)',
         duration: 0.42,
         ease: 'power2.out',
+        immediateRender: false,
+        clearProps: 'transform,filter',
       },
     );
 
     gsap.fromTo(
-      '.cyber-nav-item.active',
+      '.sidebar-nav-item.active',
       { scale: 0.985, boxShadow: '0 0 0 rgba(239, 68, 68, 0)' },
       {
         scale: 1,
@@ -147,9 +182,52 @@ export default function Home() {
     );
   }, { scope: rootRef, dependencies: [activeWindow] });
 
+  useEffect(() => {
+    if (!profileModalType && !fullscreenImage) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [profileModalType, fullscreenImage]);
+
+  useEffect(() => {
+    return () => {
+      if (profileModalTimerRef.current) {
+        window.clearTimeout(profileModalTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      if (fullscreenImage) {
+        setFullscreenImage(null);
+        return;
+      }
+
+      if (profileModalType) {
+        closeAboutModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [profileModalType, fullscreenImage]);
+
   return (
-    <div ref={rootRef} className={`home-page-root ${gsapReady ? 'gsap-enhanced' : ''} min-h-screen font-inter text-sm cyber-grid cyber-scanlines`}>
-      {/* Modern Retro Background Effects */}
+    <div ref={rootRef} className={`home-page ${gsapReady ? 'gsap-enhanced' : ''} min-h-screen font-inter text-sm page-grid scanlines`}>
+      
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-32 right-48 w-96 h-96 opacity-20 bg-gradient-to-br from-indigo-400 via-purple-400 to-transparent rounded-full blur-3xl glow-primary"></div>
         <div className="absolute bottom-40 left-40 w-80 h-48 opacity-25">
@@ -158,8 +236,8 @@ export default function Home() {
         <div className="absolute top-1/3 left-1/2 w-64 h-64 opacity-15 bg-gradient-to-br from-cyan-400 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      {/* Windows 7 Taskbar */}
-      <header className="js-taskbar win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
+      
+      <header className="js-topbar win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -184,34 +262,44 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content Area */}
+      
       <main className="flex-1 flex overflow-hidden">
-        {/* Modern Sidebar */}
-        <div className={`js-sidebar fixed md:static inset-y-0 left-0 z-40 w-80 retro-card cyber-sidebar reveal-up reveal-delay-1 transform transition-transform duration-300 ${
+        
+        <div className={`js-sidepanel fixed md:static inset-y-0 left-0 z-40 w-80 panel-card sidebar-panel reveal-up reveal-delay-1 transform transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         } mt-0 md:mt-6 ml-0 md:ml-6 rounded-xl`}>
-          <div className="retro-header cyber-sidebar-header text-base font-semibold">
+          <div className="panel-header sidebar-panel-header text-base font-semibold">
             <div className="flex items-center gap-3">
               <AutoAwesomeRoundedIcon sx={{ fontSize: 20 }} />
               <span>Navigation</span>
             </div>
           </div>
-          <div className="p-6 h-full overflow-y-auto cyber-sidebar-body">
+          <div className="p-6 h-full overflow-y-auto sidebar-panel-body">
             <div className="space-y-3">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => {
+                    if (item.id === 'about') {
+                      openAboutModal();
+                      return;
+                    }
+
+                    if (item.id === 'additional') {
+                      openAdditionalInfoModal();
+                      return;
+                    }
+
                     setActiveWindow(item.id);
                     setSidebarOpen(false);
                   }}
-                  className={`retro-nav-item cyber-nav-item group w-full text-left transition-all rounded-xl flex items-center gap-4 ${
+                  className={`nav-item sidebar-nav-item group w-full text-left transition-all rounded-xl flex items-center gap-4 ${
                     item.id === 'skills'
                       ? 'hover:bg-rose-500/20 hover:ring-2 hover:ring-rose-300/80 hover:shadow-[0_0_18px_rgba(251,113,133,0.45)]'
                       : ''
                   } ${
-                    activeWindow === item.id
-                      ? 'active cyber-nav-item-active text-red-100'
+                    (item.id === 'about' ? profileModalType === 'about' : item.id === 'additional' ? profileModalType === 'additional' : activeWindow === item.id)
+                      ? 'active sidebar-nav-item-active text-red-100'
                       : 'text-red-100 hover:text-white'
                   }`}
                 >
@@ -220,7 +308,7 @@ export default function Home() {
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-[0.92rem] tracking-wide">{item.label}</div>
-                    <div className={`cyber-nav-desc text-xs ${item.id === 'skills' ? 'group-hover:text-rose-100' : ''}`}>{item.desc}</div>
+                    <div className={`nav-description text-xs ${item.id === 'skills' ? 'group-hover:text-rose-100' : ''}`}>{item.desc}</div>
                   </div>
                 </button>
               ))}
@@ -229,11 +317,11 @@ export default function Home() {
             <div className="mt-8 pt-6 border-t border-red-900/70">
               <div className="text-xs font-semibold text-red-100/90 mb-4 uppercase tracking-wider">Quick Links</div>
               <div className="space-y-2">
-                <a href="mailto:jumagbasmarlowe@gmail.com" className="js-highlight highlight-focus retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
+                <a href="mailto:jumagbasmarlowe@gmail.com" className="js-animate-item hover-highlight panel-button quick-link w-full text-left p-3 text-xs flex items-center gap-3">
                   <EmailRoundedIcon sx={{ fontSize: 16 }} />
                   <span>Email Me</span>
                 </a>
-                <a href="https://github.com/NikolaiTengu" target="_blank" rel="noopener noreferrer" className="js-highlight highlight-focus retro-button cyber-quick-link w-full text-left p-3 text-xs flex items-center gap-3">
+                <a href="https://github.com/NikolaiTengu" target="_blank" rel="noopener noreferrer" className="js-animate-item hover-highlight panel-button quick-link w-full text-left p-3 text-xs flex items-center gap-3">
                   <GitHubIcon sx={{ fontSize: 16 }} />
                   <span>GitHub</span>
                 </a>
@@ -242,7 +330,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Overlay for mobile */}
+        
         {sidebarOpen && (
           <div 
             className="fixed inset-0 bg-black/30 z-30 md:hidden"
@@ -250,22 +338,20 @@ export default function Home() {
           ></div>
         )}
 
-        {/* Main Content Area */}
+        
         <div className="flex-1 p-4 md:p-6 space-y-6">
-          {/* Primary Application Window */}
-          <div className="js-dashboard retro-card cyber-dashboard reveal-up reveal-delay-2 h-[calc(100vh-200px)] md:h-[calc(100vh-160px)] flex flex-col">
-            <div className="retro-header flex justify-between items-center text-base relative">
+          
+          <div className="js-mainpanel panel-card main-panel reveal-up reveal-delay-2 h-[calc(100vh-200px)] md:h-[calc(100vh-160px)] flex flex-col">
+            <div className="panel-header flex justify-between items-center text-base relative">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 bg-white/20 rounded flex items-center justify-center">
                   {activeWindow === 'home' && <HomeRoundedIcon sx={{ fontSize: 14 }} />}
-                  {activeWindow === 'about' && <PersonRoundedIcon sx={{ fontSize: 14 }} />}
                   {activeWindow === 'projects' && <RocketLaunchRoundedIcon sx={{ fontSize: 14 }} />}
                   {activeWindow === 'skills' && <BoltRoundedIcon sx={{ fontSize: 14 }} />}
                   {activeWindow === 'contact' && <ContactMailRoundedIcon sx={{ fontSize: 14 }} />}
                 </div>
                 <span className="font-semibold">
                   {activeWindow === 'home' && 'Portfolio Dashboard'}
-                  {activeWindow === 'about' && 'About Me'}
                   {activeWindow === 'projects' && 'Project Showcase'}
                   {activeWindow === 'skills' && 'Technical Skills'}
                   {activeWindow === 'contact' && 'Contact Information'}
@@ -283,14 +369,15 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="js-window-content flex-1 p-6 overflow-auto cyber-dashboard-body">
-              {/* Home Window */}
+            <div className="js-content-panel flex-1 p-6 overflow-auto main-panel-body">
+              
               {activeWindow === 'home' && (
                 <div className="space-y-8 reveal-up reveal-delay-3">
                   <div className="flex flex-col lg:flex-row gap-8 items-start">
-                    <Link
-                      href="/about-me"
-                      className="group relative flex-shrink-0 w-40 h-40 md:w-48 md:h-48 retro-card p-3 bg-black/60 border border-red-700/60 hover:border-red-500 transition-all duration-300 cursor-pointer"
+                    <button
+                      type="button"
+                      onClick={openAboutModal}
+                      className="group relative flex-shrink-0 w-40 h-40 md:w-48 md:h-48 panel-card p-3 bg-black/60 border border-red-700/60 hover:border-red-500 transition-all duration-300 cursor-pointer"
                     >
                       <img 
                         src="/me.png" 
@@ -303,13 +390,13 @@ export default function Home() {
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-red-900/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-3">
                         <span className="text-xs font-semibold tracking-wide text-red-100">ENTER PROFILE</span>
                       </div>
-                    </Link>
+                    </button>
                     <div className="flex-1">
-                      <h1 className="text-4xl md:text-5xl font-bold mb-4 neon-beat bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      <h1 className="text-4xl md:text-5xl font-bold mb-4 neon-beat text-rose-100">
                         Marlowe Ian Jumagbas
                       </h1>
                       
-                      <div className="retro-card p-6 mb-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200">
+                      <div className="panel-card p-6 mb-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg">
                             <SchoolRoundedIcon sx={{ fontSize: 18 }} />
@@ -317,7 +404,7 @@ export default function Home() {
                           <h3 className="font-semibold text-white">Academic Journey</h3>
                         </div>
                         <p className="text-sm font-medium text-white">
-                          4th-Year Bachelor of Information Technology<br/>
+                          4th-Year Bachelor of Science in Information Technology<br/>
                           Saint Mary&apos;s University, Bayombong
                         </p>
                       </div>
@@ -334,8 +421,20 @@ export default function Home() {
                         {homeQuickNav.map((item) => (
                           <button
                             key={item.id}
-                            onClick={() => setActiveWindow(item.id)}
-                            className="js-highlight highlight-focus retro-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group"
+                            onClick={() => {
+                              if (item.id === 'about') {
+                                openAboutModal();
+                                return;
+                              }
+
+                              if (item.id === 'additional') {
+                                openAdditionalInfoModal();
+                                return;
+                              }
+
+                              setActiveWindow(item.id);
+                            }}
+                            className="js-animate-item hover-highlight panel-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group"
                           >
                             <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform`}>
                               <item.icon sx={{ fontSize: 20 }} />
@@ -352,92 +451,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* About Window */}
-              {activeWindow === 'about' && (
-                <div className="space-y-8">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-xl glow-primary">
-                      <PersonRoundedIcon sx={{ fontSize: 32 }} />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-bold text-white">
-                        About Me
-                      </h2>
-                      <p className="text-white/90">Get to know my background and journey</p>
-                    </div>
-                  </div>
-                  
-                  <div className="retro-card bg-gradient-to-br from-green-50 via-emerald-50 to-cyan-50 border border-green-200">
-                    <div className="retro-header bg-gradient-to-r from-green-500 to-emerald-600">
-                      <div className="flex items-center gap-3">
-                        <DescriptionRoundedIcon sx={{ fontSize: 20 }} />
-                        <span className="font-semibold">Personal & Academic Information</span>
-                      </div>
-                    </div>
-                    <div className="p-8 cyber-panel-surface">
-                      <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                          <div className="flex items-start gap-4">
-                            <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <p className="text-base leading-relaxed text-white/90">
-                              I am a 4th-year Bachelor of Science in Information Technology student at 
-                              Saint Mary&apos;s University, Bayombong. As an aspiring IT professional, I am eager to 
-                              gain hands-on experience and learn from real-world technology environments.
-                            </p>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="w-3 h-3 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <p className="text-base leading-relaxed text-white/90">
-                              I am currently exploring full-stack web development with technologies like React, 
-                              Next.js, and Node.js. Motivated, adaptable, and committed to growing my skills through 
-                              practical work and continuous learning.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-white text-lg mb-4">Quick Overview</h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="retro-card p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-                              <div className="text-2xl font-bold text-blue-600">4th</div>
-                              <div className="text-sm text-white/90">Year Level</div>
-                            </div>
-                            <div className="retro-card p-4 bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-                              <div className="text-2xl font-bold text-green-600">BSIT</div>
-                              <div className="text-sm text-white/90">Degree Program</div>
-                            </div>
-                            <div className="retro-card p-4 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-                              <div className="text-2xl font-bold text-purple-600">SMU</div>
-                              <div className="text-sm text-white/90">University</div>
-                            </div>
-                            <div className="retro-card p-4 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
-                              <div className="text-2xl font-bold text-orange-600">2026</div>
-                              <div className="text-sm text-white/90">Expected Grad</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-8 pt-6 border-t border-gray-200">
-                        <h4 className="font-semibold text-white mb-4">Current Focus Areas</h4>
-                        <div className="flex flex-wrap gap-3">
-                          {['Full-Stack Development', 'React.js', 'Node.js', 'Database Design', 'UI/UX Design', 'DevOps'].map((focus, idx) => (
-                            <span key={focus} className={`px-4 py-2 rounded-full text-sm font-medium ${
-                              idx % 3 === 0 ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                              idx % 3 === 1 ? 'bg-green-100 text-green-700 border border-green-300' :
-                              'bg-purple-100 text-purple-700 border border-purple-300'
-                            }`}>
-                              {focus}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Projects Window */}
+              
               {activeWindow === 'projects' && (
                 <div className="space-y-8">
                   <div className="flex items-center gap-4 mb-8">
@@ -445,7 +459,7 @@ export default function Home() {
                       <RocketLaunchRoundedIcon sx={{ fontSize: 32 }} />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      <h2 className="text-3xl font-bold text-rose-100">
                         Project Showcase
                       </h2>
                       <p className="text-white/90">A collection of my recent work and achievements</p>
@@ -454,8 +468,8 @@ export default function Home() {
                   
                   <div className="space-y-6">
                     {projects.map((project, idx) => (
-                      <div key={project.id} className="js-highlight highlight-focus retro-card overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-                        <div className="retro-header flex justify-between items-center">
+                      <div key={project.id} className="js-animate-item hover-highlight panel-card overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+                        <div className="panel-header flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${
                               idx % 3 === 0 ? 'bg-gradient-to-br from-blue-500 to-cyan-500' :
@@ -468,13 +482,13 @@ export default function Home() {
                           </div>
                           <button 
                             onClick={() => setFullscreenImage(project.image)}
-                            className="retro-button px-4 py-2 text-sm bg-white/20 border-white/30 hover:bg-white/30 text-white"
+                            className="panel-button px-4 py-2 text-sm bg-white/20 border-white/30 hover:bg-white/30 text-white"
                           >
                             <span className="inline-flex items-center gap-1.5"><ZoomInRoundedIcon sx={{ fontSize: 16 }} />Preview</span>
                           </button>
                         </div>
                         
-                        <div className="cyber-panel-surface">
+                        <div className="content-surface">
                           {project.image && (
                             <div 
                               className="h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden cursor-pointer group/img relative"
@@ -489,7 +503,7 @@ export default function Home() {
                                 }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center">
-                                <div className="retro-button px-6 py-3 text-white bg-black/50 border-white/30 backdrop-blur-sm">
+                                <div className="panel-button px-6 py-3 text-white bg-black/50 border-white/30 backdrop-blur-sm">
                                   <span className="inline-flex items-center gap-2"><ZoomInRoundedIcon sx={{ fontSize: 18 }} />View Full Size</span>
                                 </div>
                               </div>
@@ -497,7 +511,7 @@ export default function Home() {
                           )}
                           
                           <div className="p-8">
-                            <h3 className="font-bold text-xl mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                            <h3 className="font-bold text-xl mb-4 text-rose-100">
                               {project.name}
                             </h3>
                             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-l-4 border-indigo-400 mb-6">
@@ -507,16 +521,16 @@ export default function Home() {
                             </div>
                             
                             <div className="space-y-3">
-                              <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Technology Stack</h4>
+                              <h4 className="text-sm font-semibold text-rose-100/90 uppercase tracking-wider">Technology Stack</h4>
                               <div className="flex flex-wrap gap-2">
                                 {project.skills.map((skill, skillIdx) => (
                                   <span
                                     key={skill}
                                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 ${
-                                      skillIdx % 4 === 0 ? 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200' :
-                                      skillIdx % 4 === 1 ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200' :
-                                      skillIdx % 4 === 2 ? 'bg-purple-100 text-purple-700 border border-purple-300 hover:bg-purple-200' :
-                                      'bg-orange-100 text-orange-700 border border-orange-300 hover:bg-orange-200'
+                                      skillIdx % 4 === 0 ? 'bg-blue-700 text-blue-50 border border-blue-400/80 hover:bg-blue-600 shadow-[0_0_10px_rgba(59,130,246,0.28)]' :
+                                      skillIdx % 4 === 1 ? 'bg-emerald-700 text-emerald-50 border border-emerald-400/80 hover:bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.28)]' :
+                                      skillIdx % 4 === 2 ? 'bg-violet-700 text-violet-50 border border-violet-400/80 hover:bg-violet-600 shadow-[0_0_10px_rgba(139,92,246,0.28)]' :
+                                      'bg-amber-700 text-amber-50 border border-amber-400/80 hover:bg-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.28)]'
                                     }`}
                                   >
                                     {skill}
@@ -532,7 +546,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Skills Window */}
+              
               {activeWindow === 'skills' && (
                 <div className="space-y-8">
                   <div className="flex items-center gap-4 mb-8">
@@ -549,8 +563,8 @@ export default function Home() {
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     {skills.map((skillGroup, idx) => (
-                      <div key={idx} className="js-highlight highlight-focus retro-card group hover:scale-105 transition-all duration-300">
-                        <div className={`retro-header ${
+                      <div key={idx} className="js-animate-item hover-highlight panel-card group hover:scale-105 transition-all duration-300">
+                        <div className={`panel-header ${
                           idx === 0 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
                           idx === 1 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                           idx === 2 ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
@@ -563,7 +577,7 @@ export default function Home() {
                             <span className="font-semibold text-lg">{skillGroup.category}</span>
                           </div>
                         </div>
-                        <div className="p-6 cyber-panel-surface space-y-4">
+                        <div className="p-6 content-surface space-y-4">
                           <div className="grid grid-cols-1 gap-3">
                             {skillGroup.items.map((item, itemIdx) => (
                               <div key={item} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-all group/item">
@@ -604,7 +618,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Contact Window */}
+              
               {activeWindow === 'contact' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -612,18 +626,18 @@ export default function Home() {
                       <EmailRoundedIcon sx={{ fontSize: 24 }} />
                     </div>
                     <h2
-                      className="retro-header text-2xl font-semibold text-white"
+                      className="panel-header text-2xl font-semibold text-white"
                       style={{ WebkitTextFillColor: 'currentColor', WebkitBackgroundClip: 'border-box', backgroundClip: 'border-box' }}
                     >
                       Contact Information
                     </h2>
                   </div>
                   
-                  <div className="retro-card p-6">
-                    <div className="retro-header -m-6 mb-6 inline-flex items-center gap-2 text-white">
+                  <div className="panel-card p-6">
+                    <div className="panel-header -m-6 mb-6 inline-flex items-center gap-2 text-white">
                       <EmailRoundedIcon sx={{ fontSize: 18 }} /> New Message - Let&apos;s Connect!
                     </div>
-                    <div className="cyber-panel-surface p-6 rounded-lg border border-red-900/60 shadow-inner">
+                    <div className="content-surface p-6 rounded-lg border border-red-900/60 shadow-inner">
                       <p className="text-sm text-white/90 leading-relaxed bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border-l-4 border-indigo-400">
                         Ready to collaborate on your next project? I&apos;d love to hear from you! 
                         Feel free to reach out through any of the channels below. I typically 
@@ -635,7 +649,7 @@ export default function Home() {
                   <div className="space-y-4 max-w-2xl">
                     <a
                       href="mailto:jumagbasmarlowe@gmail.com"
-                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-animate-item hover-highlight panel-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <EmailRoundedIcon sx={{ fontSize: 22 }} />
@@ -652,7 +666,7 @@ export default function Home() {
                       href="https://github.com/NikolaiTengu"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-animate-item hover-highlight panel-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <GitHubIcon sx={{ fontSize: 22 }} />
@@ -669,7 +683,7 @@ export default function Home() {
                       href="https://www.linkedin.com/in/marlowe-ian-jumagbas"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="js-highlight highlight-focus retro-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
+                      className="js-animate-item hover-highlight panel-button p-4 text-left flex items-center gap-4 hover:scale-[1.02] transition-all group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-lg flex items-center justify-center text-white text-xl shadow-xl group-hover:scale-105 transition-transform">
                         <LinkedInIcon sx={{ fontSize: 22 }} />
@@ -683,8 +697,8 @@ export default function Home() {
                     </a>
                   </div>
                   
-                  <div className="retro-card p-4 bg-gradient-to-r from-yellow-50 to-orange-50">
-                    <div className="retro-header text-xs -m-4 mb-3 bg-gradient-to-r from-yellow-500 to-orange-600 inline-flex items-center gap-2">
+                  <div className="panel-card p-4 bg-gradient-to-r from-yellow-50 to-orange-50">
+                    <div className="panel-header text-xs -m-4 mb-3 bg-gradient-to-r from-yellow-500 to-orange-600 inline-flex items-center gap-2">
                       <WarningAmberRoundedIcon sx={{ fontSize: 16 }} /> Quick Note
                     </div>
                     <div className="mt-4">
@@ -702,8 +716,8 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Modern Retro Status Bar */}
-      <footer className="js-footer bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-900 px-4 py-3 flex justify-between items-center shadow-2xl border-t border-white/10 relative z-50">
+      
+      <footer className="js-bottombar bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-900 px-4 py-3 flex justify-between items-center shadow-2xl border-t border-white/10 relative z-50">
         <div className="flex items-center gap-4">
           <div className="text-sm px-4 py-2 rounded-lg bg-white/10 border border-white/15 text-white/90 font-medium shadow-inner select-none cursor-default inline-flex items-center">
             <span className="mr-2"><HomeRoundedIcon sx={{ fontSize: 16 }} /></span>
@@ -735,14 +749,42 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Enhanced Image Viewer Modal */}
+      {profileModalType && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 md:p-6 about-modal-overlay ${profileModalClosing ? 'about-modal-overlay-closing' : ''}`}
+          onClick={closeAboutModal}
+        >
+          <div
+            className={`panel-card w-full max-w-6xl h-[92vh] overflow-hidden ${profileModalClosing ? 'app-popout' : 'app-popin'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="panel-header flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                {profileModalType === 'about' ? <PersonRoundedIcon sx={{ fontSize: 20 }} /> : <NotesRoundedIcon sx={{ fontSize: 20 }} />}
+                <span className="font-semibold">{profileModalType === 'about' ? 'About Me' : 'Additional Personal Info'}</span>
+              </div>
+              <button
+                onClick={closeAboutModal}
+                className="w-6 h-6 bg-white/10 rounded hover:bg-red-400/20 transition-colors flex items-center justify-center"
+              >
+                <CloseRoundedIcon sx={{ fontSize: 14 }} />
+              </button>
+            </div>
+            <div className="h-[calc(92vh-60px)] overflow-y-auto p-4 md:p-6 bg-black/35">
+              <AboutContent mode="modal" section={profileModalType === 'about' ? 'about' : 'additional'} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      
       {fullscreenImage && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
           onClick={() => setFullscreenImage(null)}
         >
-          <div className="retro-card w-full max-w-6xl max-h-[92vh] overflow-hidden">
-            <div className="retro-header flex justify-between items-center">
+          <div className="panel-card w-full max-w-6xl max-h-[92vh] overflow-hidden">
+            <div className="panel-header flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <ImageRoundedIcon sx={{ fontSize: 20 }} />
                 <span className="font-semibold">Image Viewer - Project Preview</span>
@@ -762,7 +804,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <div className="cyber-panel-surface p-6">
+            <div className="content-surface p-6">
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200 shadow-inner h-[68vh] flex items-center justify-center overflow-hidden">
                 <img 
                   src={fullscreenImage} 

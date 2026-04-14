@@ -1,24 +1,24 @@
-/* Home page stylesheet hook for app/page.tsx */
 
-.home-page-root {
+
+.home-page {
   min-height: 100vh;
 }
 
-.home-page-root.gsap-enhanced .reveal-up,
-.home-page-root.gsap-enhanced .neon-beat {
+.home-page.gsap-enhanced .reveal-up,
+.home-page.gsap-enhanced .neon-beat {
   animation: none !important;
   opacity: 1 !important;
   transform: none !important;
 }
 
-.home-page-root .highlight-focus {
+.home-page .hover-highlight {
   position: relative;
   overflow: hidden;
   will-change: transform, box-shadow, filter;
   transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
 }
 
-.home-page-root .highlight-focus::after {
+.home-page .hover-highlight::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -28,13 +28,13 @@
   pointer-events: none;
 }
 
-.home-page-root .highlight-focus:hover {
+.home-page .hover-highlight:hover {
   transform: translateY(-2px);
   filter: saturate(1.05);
   box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.42) inset, 0 0 22px rgba(248, 113, 113, 0.33);
 }
 
-.home-page-root .highlight-focus:hover::after {
+.home-page .hover-highlight:hover::after {
   opacity: 1;
   animation: highlightSweep 680ms ease-out forwards;
 }
@@ -45,5 +45,81 @@
   }
   to {
     transform: translateX(140%);
+  }
+}
+
+@keyframes appPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.965);
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.008);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes appPopOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    filter: blur(6px);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.about-modal-overlay {
+  animation: modalFadeIn 180ms ease-out;
+}
+
+.about-modal-overlay-closing {
+  animation: modalFadeOut 220ms ease-in forwards;
+}
+
+.app-popin {
+  animation: appPopIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+
+.app-popout {
+  animation: appPopOut 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-popin,
+  .app-popout,
+  .about-modal-overlay,
+  .about-modal-overlay-closing {
+    animation: none !important;
   }
 }
