@@ -92,9 +92,11 @@ export default function Home() {
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [gsapReady, setGsapReady] = useState(false);
+  const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
   const rootRef = useRef<HTMLDivElement | null>(null);
   const profileModalTimerRef = useRef<number | null>(null);
   const ABOUT_MODAL_ANIMATION_MS = 220;
+  const metroTickerMessage = Array.from({ length: 14 }, () => 'WELCOME!').join('  •  ');
 
   const openProfileModal = (type: 'about' | 'additional') => {
     if (profileModalTimerRef.current) {
@@ -183,6 +185,16 @@ export default function Home() {
   }, { scope: rootRef, dependencies: [activeWindow] });
 
   useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!profileModalType && !fullscreenImage) {
       return;
     }
@@ -238,7 +250,7 @@ export default function Home() {
 
       
       <header className="js-topbar win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 w-full min-w-0">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="win7-taskbar-button px-4 py-2 text-sm font-medium md:hidden rounded-md"
@@ -252,13 +264,13 @@ export default function Home() {
             <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded border border-blue-300 shadow-sm flex items-center justify-center">
               <WebAssetRoundedIcon sx={{ fontSize: 14, color: 'white' }} />
             </div>
-            <span className="font-medium text-white text-sm hidden sm:block">Portfolio - Marlowe Ian Jumagbas</span>
-            <span className="font-medium text-white text-sm sm:hidden">M.I.J Portfolio</span>
           </div>
-        </div>
-        <div className="text-xs text-white/90 hidden sm:flex items-center gap-3">
-          <span>{new Date().toLocaleDateString()}</span>
-          <span>{new Date().toLocaleTimeString()}</span>
+          <div className="metro-marquee-wrap" aria-label="Welcome banner">
+            <div className="metro-marquee-track">
+              <span className="metro-marquee-text">{metroTickerMessage}</span>
+              <span className="metro-marquee-text" aria-hidden="true">{metroTickerMessage}</span>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -434,7 +446,9 @@ export default function Home() {
 
                               setActiveWindow(item.id);
                             }}
-                            className="js-animate-item hover-highlight panel-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group"
+                            className={`js-animate-item hover-highlight panel-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group ${
+                              item.id === 'contact' ? 'col-span-2 mx-auto w-full max-w-md justify-center text-center' : ''
+                            }`}
                           >
                             <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform`}>
                               <item.icon sx={{ fontSize: 20 }} />
@@ -744,7 +758,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg shadow-inner">
             <ScheduleRoundedIcon sx={{ fontSize: 17 }} />
-            <span className="font-mono">{new Date().toLocaleTimeString()}</span>
+            <span className="font-mono">{currentTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
           </div>
         </div>
       </footer>

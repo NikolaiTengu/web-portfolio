@@ -8,7 +8,7 @@ const xpFonts = {
 };
 
 export const metadata: Metadata = {
-  title: "Marlowe Ian Jumagbas - Portfolio [Modern Retro]",
+  title: "Marlowe Ian P. Jumagbas - Portfolio",
   description: "Modernized retro-inspired portfolio website of Marlowe Ian Jumagbas",
 };
 

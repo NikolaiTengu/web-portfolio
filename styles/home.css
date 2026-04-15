@@ -115,7 +115,91 @@
   transform-origin: center;
 }
 
+.home-page .metro-marquee-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin-left: 0.15rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.55), rgba(30, 41, 59, 0.35));
+  box-shadow: inset 0 0 10px rgba(15, 23, 42, 0.35);
+}
+
+.home-page .metro-marquee-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.2) 50%, transparent 80%);
+  transform: translateX(-130%);
+  animation: metroLightSweep 3.2s linear infinite;
+  pointer-events: none;
+}
+
+.home-page .metro-marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  min-height: 100%;
+  white-space: nowrap;
+  animation: metroTicker 20s linear infinite;
+}
+
+.home-page .metro-marquee-text {
+  display: inline-block;
+  padding: 0.28rem 1.25rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  animation: metroWelcomePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes metroWelcomePulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.28);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.5), 0 0 26px rgba(96, 165, 250, 0.25);
+  }
+}
+
+@keyframes metroTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes metroLightSweep {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130%);
+  }
+}
+
+@media (max-width: 640px) {
+  .home-page .metro-marquee-text {
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .home-page .metro-marquee-wrap::after,
+  .home-page .metro-marquee-track,
+  .home-page .metro-marquee-text,
   .app-popin,
   .app-popout,
   .about-modal-overlay,
