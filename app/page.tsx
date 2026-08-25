@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import AboutContent from './components/AboutContent';
+import Particles from './components/Particles';
+import StaggeredMenu from './components/StaggeredMenu';
 import '../styles/home.css';
 import { useGSAP } from '@gsap/react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap, ScrollTrigger } from '../lib/gsap';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
@@ -28,7 +29,6 @@ import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import RocketLaunchRoundedIcon from '@mui/icons-material/RocketLaunchRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
@@ -77,22 +77,41 @@ const navItems = [
   { id: 'contact', label: 'Contact', icon: ContactMailRoundedIcon, desc: 'Get In Touch', color: 'from-red-500 to-pink-500' },
 ];
 
-const homeQuickNav = [
-  { label: 'About Me', id: 'about', icon: PersonRoundedIcon, color: 'from-green-500 to-emerald-600', desc: 'My story' },
-  { label: 'Additional Info', id: 'additional', icon: NotesRoundedIcon, color: 'from-rose-500 to-red-600', desc: 'More personal info' },
-  { label: 'Projects', id: 'projects', icon: RocketLaunchRoundedIcon, color: 'from-blue-500 to-cyan-600', desc: 'Portfolio showcase' },
-  { label: 'Skills', id: 'skills', icon: BoltRoundedIcon, color: 'from-purple-500 to-pink-600', desc: 'Tech stack' },
-  { label: 'Contact', id: 'contact', icon: ContactMailRoundedIcon, color: 'from-red-500 to-rose-600', desc: 'Get in touch' },
-];
+function useReducedMotionPreference() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    updatePreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updatePreference);
+      return () => mediaQuery.removeEventListener('change', updatePreference);
+    }
+
+    mediaQuery.addListener(updatePreference);
+    return () => mediaQuery.removeListener(updatePreference);
+  }, []);
+
+  return prefersReducedMotion;
+}
 
 export default function Home() {
   const [activeWindow, setActiveWindow] = useState('home');
   const [profileModalType, setProfileModalType] = useState<'about' | 'additional' | null>(null);
   const [profileModalClosing, setProfileModalClosing] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [gsapReady, setGsapReady] = useState(false);
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
+  const [bootSequenceVisible, setBootSequenceVisible] = useState(false);
+  const [bootProgress, setBootProgress] = useState(0);
+  const prefersReducedMotion = useReducedMotionPreference();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const profileModalTimerRef = useRef<number | null>(null);
   const ABOUT_MODAL_ANIMATION_MS = 220;
@@ -106,7 +125,6 @@ export default function Home() {
 
     setProfileModalClosing(false);
     setProfileModalType(type);
-    setSidebarOpen(false);
   };
 
   const openAboutModal = () => openProfileModal('about');
@@ -125,12 +143,72 @@ export default function Home() {
     }, ABOUT_MODAL_ANIMATION_MS);
   };
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const hasSeenBoot = window.sessionStorage.getItem('zzz-boot-seen');
+    if (prefersReducedMotion || hasSeenBoot === '1') {
+      setBootSequenceVisible(false);
+      setBootProgress(100);
+      return undefined;
+    }
+
+    setBootSequenceVisible(true);
+    const progressSequence = [20, 42, 68, 100];
+    const timers = progressSequence.map((value, index) =>
+      window.setTimeout(() => setBootProgress(value), 220 + index * 260),
+    );
+
+    const hideTimer = window.setTimeout(() => {
+      setBootSequenceVisible(false);
+      setBootProgress(100);
+      window.sessionStorage.setItem('zzz-boot-seen', '1');
+    }, 1500);
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.clearTimeout(hideTimer);
+    };
+  }, [prefersReducedMotion]);
+
   useGSAP(() => {
+    if (prefersReducedMotion || !bootSequenceVisible) {
+      return;
+    }
+
+    gsap.fromTo(
+      '.boot-panel',
+      { autoAlpha: 0, y: -16 },
+      { autoAlpha: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+    );
+
+    gsap.to('.boot-fill', {
+      width: `${bootProgress}%`,
+      duration: 0.4,
+      ease: 'power1.out',
+      overwrite: 'auto',
+    });
+  }, { scope: rootRef, dependencies: [bootProgress, bootSequenceVisible, prefersReducedMotion] });
+
+  useGSAP(() => {
+    if (prefersReducedMotion) {
+      gsap.set(['.js-topbar', '.js-mainpanel', '.js-bottombar', '.js-content-panel'], {
+        clearProps: 'all',
+        opacity: 1,
+        x: 0,
+        y: 0,
+        filter: 'none',
+      });
+      setGsapReady(true);
+      return;
+    }
+
     const introTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     introTimeline
       .from('.js-topbar', { y: -18, duration: 0.45, clearProps: 'transform' })
-      .from('.js-sidepanel', { x: -36, duration: 0.55, clearProps: 'transform' }, '-=0.25')
       .from('.js-mainpanel', { y: 24, duration: 0.55, clearProps: 'transform' }, '-=0.3')
       .from('.js-bottombar', { y: 12, duration: 0.4, clearProps: 'transform' }, '-=0.2');
 
@@ -155,9 +233,14 @@ export default function Home() {
     });
 
     setGsapReady(true);
-  }, { scope: rootRef });
+  }, { scope: rootRef, dependencies: [prefersReducedMotion] });
 
   useGSAP(() => {
+    if (prefersReducedMotion) {
+      gsap.set('.js-content-panel', { opacity: 1, y: 0, filter: 'none' });
+      return;
+    }
+
     gsap.fromTo(
       '.js-content-panel',
       { y: 16, filter: 'blur(5px)' },
@@ -170,19 +253,7 @@ export default function Home() {
         clearProps: 'transform,filter',
       },
     );
-
-    gsap.fromTo(
-      '.sidebar-nav-item.active',
-      { scale: 0.985, boxShadow: '0 0 0 rgba(239, 68, 68, 0)' },
-      {
-        scale: 1,
-        boxShadow: '0 0 24px rgba(248, 113, 113, 0.42)',
-        duration: 0.45,
-        ease: 'power2.out',
-        clearProps: 'transform',
-      },
-    );
-  }, { scope: rootRef, dependencies: [activeWindow] });
+  }, { scope: rootRef, dependencies: [activeWindow, prefersReducedMotion] });
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -238,8 +309,8 @@ export default function Home() {
   }, [profileModalType, fullscreenImage]);
 
   return (
-    <div ref={rootRef} className={`home-page ${gsapReady ? 'gsap-enhanced' : ''} min-h-screen font-inter text-sm page-grid scanlines`}>
-      
+    <div ref={rootRef} className={`home-page zzz-shell ${gsapReady ? 'gsap-enhanced' : ''} min-h-screen font-inter text-sm page-grid scanlines`}>
+      <Particles count={prefersReducedMotion ? 10 : 18} maxSpeed={prefersReducedMotion ? 0.12 : 0.24} color="244, 208, 63" />
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-32 right-48 w-96 h-96 opacity-20 bg-gradient-to-br from-indigo-400 via-purple-400 to-transparent rounded-full blur-3xl glow-primary"></div>
         <div className="absolute bottom-40 left-40 w-80 h-48 opacity-25">
@@ -251,15 +322,37 @@ export default function Home() {
       
       <header className="js-topbar win7-taskbar neon-beat flex justify-between items-center px-4 py-3 shadow-lg relative z-50">
         <div className="flex items-center gap-4 w-full min-w-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="win7-taskbar-button px-4 py-2 text-sm font-medium md:hidden rounded-md"
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <WebAssetRoundedIcon sx={{ fontSize: 16 }} />
-              Start
-            </span>
-          </button>
+          <StaggeredMenu
+            position="left"
+            items={navItems.map((item) => ({
+              label: item.label,
+              ariaLabel: item.desc,
+              onClick: () => {
+                if (item.id === 'about') {
+                  openAboutModal();
+                  return;
+                }
+
+                if (item.id === 'additional') {
+                  openAdditionalInfoModal();
+                  return;
+                }
+
+                setActiveWindow(item.id);
+              },
+            }))}
+            socialItems={[
+              { label: 'GitHub', link: 'https://github.com/NikolaiTengu' },
+              { label: 'LinkedIn', link: 'https://www.linkedin.com/in/marlowe-ian-jumagbas' },
+            ]}
+            displaySocials
+            displayItemNumbering
+            menuButtonColor="#f4f4f6"
+            openMenuButtonColor="#f4f4f6"
+            changeMenuColorOnOpen
+            colors={['#0b0b0b', '#121212']}
+            accentColor="#ef4444"
+          />
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded border border-blue-300 shadow-sm flex items-center justify-center">
               <WebAssetRoundedIcon sx={{ fontSize: 14, color: 'white' }} />
@@ -276,83 +369,26 @@ export default function Home() {
 
       
       <main className="flex-1 flex overflow-hidden">
-        
-        <div className={`js-sidepanel fixed md:static inset-y-0 left-0 z-40 w-80 panel-card sidebar-panel reveal-up reveal-delay-1 transform transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } mt-0 md:mt-6 ml-0 md:ml-6 rounded-xl`}>
-          <div className="panel-header sidebar-panel-header text-base font-semibold">
-            <div className="flex items-center gap-3">
-              <AutoAwesomeRoundedIcon sx={{ fontSize: 20 }} />
-              <span>Navigation</span>
-            </div>
-          </div>
-          <div className="p-6 h-full overflow-y-auto sidebar-panel-body">
-            <div className="space-y-3">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'about') {
-                      openAboutModal();
-                      return;
-                    }
-
-                    if (item.id === 'additional') {
-                      openAdditionalInfoModal();
-                      return;
-                    }
-
-                    setActiveWindow(item.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`nav-item sidebar-nav-item group w-full text-left transition-all rounded-xl flex items-center gap-4 ${
-                    item.id === 'skills'
-                      ? 'hover:bg-rose-500/20 hover:ring-2 hover:ring-rose-300/80 hover:shadow-[0_0_18px_rgba(251,113,133,0.45)]'
-                      : ''
-                  } ${
-                    (item.id === 'about' ? profileModalType === 'about' : item.id === 'additional' ? profileModalType === 'additional' : activeWindow === item.id)
-                      ? 'active sidebar-nav-item-active text-red-100'
-                      : 'text-red-100 hover:text-white'
-                  }`}
-                >
-                  <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-lg flex items-center justify-center text-white shadow-lg text-lg`}>
-                    <item.icon sx={{ fontSize: 20 }} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-[0.92rem] tracking-wide">{item.label}</div>
-                    <div className={`nav-description text-xs ${item.id === 'skills' ? 'group-hover:text-rose-100' : ''}`}>{item.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            <div className="mt-8 pt-6 border-t border-red-900/70">
-              <div className="text-xs font-semibold text-red-100/90 mb-4 uppercase tracking-wider">Quick Links</div>
-              <div className="space-y-2">
-                <a href="mailto:jumagbasmarlowe@gmail.com" className="js-animate-item hover-highlight panel-button quick-link w-full text-left p-3 text-xs flex items-center gap-3">
-                  <EmailRoundedIcon sx={{ fontSize: 16 }} />
-                  <span>Email Me</span>
-                </a>
-                <a href="https://github.com/NikolaiTengu" target="_blank" rel="noopener noreferrer" className="js-animate-item hover-highlight panel-button quick-link w-full text-left p-3 text-xs flex items-center gap-3">
-                  <GitHubIcon sx={{ fontSize: 16 }} />
-                  <span>GitHub</span>
-                </a>
+        <div className="flex-1 p-4 md:p-6 space-y-6">
+          {bootSequenceVisible && (
+            <div className="boot-overlay">
+              <div className="boot-panel">
+                <div className="boot-header">
+                  <span>SYS // BOOT</span>
+                  <span>{bootProgress}%</span>
+                </div>
+                <div className="boot-meter">
+                  <span className="boot-fill" style={{ width: `${bootProgress}%` }} />
+                </div>
+                <div className="boot-sequence">
+                  <span>INIT</span>
+                  <span>SYNC</span>
+                  <span>READY</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/30 z-30 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          ></div>
-        )}
-
-        
-        <div className="flex-1 p-4 md:p-6 space-y-6">
-          
           <div className="js-mainpanel panel-card main-panel reveal-up reveal-delay-2 h-[calc(100vh-200px)] md:h-[calc(100vh-160px)] flex flex-col">
             <div className="panel-header flex justify-between items-center text-base relative">
               <div className="flex items-center gap-3">
@@ -385,81 +421,46 @@ export default function Home() {
               
               {activeWindow === 'home' && (
                 <div className="space-y-8 reveal-up reveal-delay-3">
-                  <div className="flex flex-col lg:flex-row gap-8 items-start">
-                    <button
-                      type="button"
-                      onClick={openAboutModal}
-                      className="group relative flex-shrink-0 w-40 h-40 md:w-48 md:h-48 panel-card p-3 bg-black/60 border border-red-700/60 hover:border-red-500 transition-all duration-300 cursor-pointer"
-                    >
-                      <img 
-                        src="/me.png" 
+                  <div className="flex flex-col xl:flex-row gap-8 items-center xl:items-start">
+                    <div className="panel-card p-4 bg-black/60 border border-red-700/60">
+                      <img
+                        src="/me.png"
                         alt="Marlowe Ian Jumagbas"
-                        className="w-full h-full object-cover rounded-lg shadow-sm group-hover:scale-[1.02] transition-transform"
+                        className="w-48 h-48 md:w-56 md:h-56 object-cover rounded-xl shadow-sm"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-red-900/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-3">
-                        <span className="text-xs font-semibold tracking-wide text-red-100">ENTER PROFILE</span>
-                      </div>
-                    </button>
-                    <div className="flex-1">
-                      <h1 className="text-4xl md:text-5xl font-bold mb-4 neon-beat text-rose-100">
-                        Marlowe Ian Jumagbas
-                      </h1>
-                      
-                      <div className="panel-card p-6 mb-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg">
-                            <SchoolRoundedIcon sx={{ fontSize: 18 }} />
-                          </div>
-                          <h3 className="font-semibold text-white">Academic Journey</h3>
-                        </div>
-                        <p className="text-sm font-medium text-white">
-                          4th-Year Bachelor of Science in Information Technology<br/>
-                          Saint Mary&apos;s University, Bayombong
-                        </p>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-l-4 border-indigo-400 mb-8">
-                        <p className="text-base leading-relaxed text-white">
-                          Welcome to my digital portfolio! I&apos;m a passionate full-stack developer 
-                          specializing in modern web technologies. Explore my journey through 
-                          projects, skills, and professional experience.
-                        </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 max-w-2xl">
-                        {homeQuickNav.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => {
-                              if (item.id === 'about') {
-                                openAboutModal();
-                                return;
-                              }
+                    </div>
 
-                              if (item.id === 'additional') {
-                                openAdditionalInfoModal();
-                                return;
-                              }
-
-                              setActiveWindow(item.id);
-                            }}
-                            className={`js-animate-item hover-highlight panel-button text-sm px-4 py-4 text-left flex items-center gap-3 hover:shadow-lg transition-all group ${
-                              item.id === 'contact' ? 'col-span-2 mx-auto w-full max-w-md justify-center text-center' : ''
-                            }`}
-                          >
-                            <div className={`w-10 h-10 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform`}>
-                              <item.icon sx={{ fontSize: 20 }} />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-white">{item.label}</div>
-                              <div className="text-xs text-white/90">{item.desc}</div>
-                            </div>
-                          </button>
+                    <div className="disk-console flex-1">
+                      <div className="disk-ring" aria-label="Drive status display">
+                        <div className="disk-needle" />
+                        {[0, 1, 2, 3].map((index) => (
+                          <span
+                            key={index}
+                            className="disk-indicator"
+                            style={{ transform: `rotate(${index * 90}deg) translateY(-48px)` }}
+                          />
                         ))}
                       </div>
+                      <div className="disk-meta">
+                        <span className="disk-label">SYS // DRIVE</span>
+                        <strong>READY</strong>
+                        <small>RUNTIME STABLE</small>
+                      </div>
+                    </div>
+
+                    <div className="text-center xl:text-left flex-1">
+                      <h1 className="text-4xl md:text-5xl font-bold neon-beat text-rose-100">
+                        Marlowe Ian Jumagbas
+                      </h1>
+                      <p className="mt-3 text-lg md:text-xl text-white/85 tracking-wide">
+                        Full-Stack Developer
+                      </p>
+                      <p className="mt-4 max-w-xl text-sm md:text-base text-white/70 tracking-wide">
+                        Live a life you want, not burden by anything but to life fully..
+                      </p>
                     </div>
                   </div>
                 </div>

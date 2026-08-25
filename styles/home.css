@@ -2,6 +2,182 @@
 
 .home-page {
   min-height: 100vh;
+  position: relative;
+}
+
+.zzz-shell {
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(244, 208, 63, 0.08), transparent 25%),
+    radial-gradient(circle at 80% 15%, rgba(255, 107, 87, 0.06), transparent 25%),
+    #0a0b0d;
+}
+
+.particles-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.boot-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 9, 11, 0.76);
+  backdrop-filter: blur(4px);
+}
+
+.boot-panel {
+  width: min(440px, calc(100% - 32px));
+  border: 2px solid rgba(244, 208, 63, 0.8);
+  background: rgba(11, 13, 16, 0.96);
+  box-shadow: 0 0 0 4px rgba(244, 208, 63, 0.1), 6px 6px 0 rgba(0, 0, 0, 0.6);
+  padding: 16px;
+}
+
+.boot-header,
+.boot-sequence {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.boot-meter {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  margin: 18px 0 14px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.boot-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #f4d03f, #ff6b57);
+  box-shadow: 0 0 16px rgba(244, 208, 63, 0.35);
+}
+
+.boot-sequence {
+  justify-content: center;
+  font-size: 0.58rem;
+}
+
+.disk-console {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 2px solid rgba(244, 208, 63, 0.5);
+  background: rgba(16, 18, 22, 0.8);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
+}
+
+.disk-ring {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2));
+  animation: diskRotate 8s linear infinite;
+}
+
+.disk-ring::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+}
+
+.disk-ring::after {
+  content: '';
+  position: absolute;
+  inset: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(244, 208, 63, 0.9), rgba(255, 107, 87, 0.8));
+  box-shadow: 0 0 18px rgba(244, 208, 63, 0.3);
+}
+
+.disk-needle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -100%);
+  transform-origin: center bottom;
+}
+
+.disk-indicator {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: rgba(244, 208, 63, 0.9);
+  box-shadow: 0 0 12px rgba(244, 208, 63, 0.5);
+}
+
+.disk-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.disk-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.disk-meta strong {
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  color: #f4d03f;
+}
+
+.disk-meta small {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+@keyframes diskRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1280px) {
+  .disk-console {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disk-ring, .boot-overlay, .boot-fill {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .home-page.gsap-enhanced .reveal-up,
@@ -206,4 +382,138 @@
   .about-modal-overlay-closing {
     animation: none !important;
   }
+}
+
+.staggered-menu {
+  position: relative;
+  z-index: 60;
+}
+
+.staggered-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.staggered-menu-label {
+  position: relative;
+  top: 1px;
+}
+
+.staggered-menu-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-8%);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-blend-mode: screen;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+}
+
+.staggered-menu.right .staggered-menu-panel {
+  transform: translateX(8%);
+}
+
+.staggered-menu.is-open .staggered-menu-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.staggered-menu-sheen {
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.staggered-menu-content {
+  position: relative;
+  width: min(440px, 90vw);
+  color: #f4f4f6;
+  display: grid;
+  gap: 22px;
+}
+
+.staggered-menu-logo img {
+  width: 84px;
+  height: auto;
+  display: block;
+}
+
+.staggered-menu-nav {
+  display: grid;
+  gap: 12px;
+}
+
+.staggered-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: inherit;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.staggered-menu-number {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+}
+
+.staggered-menu-text {
+  font-weight: 600;
+}
+
+.staggered-menu-socials {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.staggered-menu-social {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .staggered-menu-panel {
+    transition: none;
+    transform: none;
+  }
+}
+
+.menu-open .scanlines::after {
+  animation: none !important;
+  opacity: 0.08;
 }
