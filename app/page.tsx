@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import AboutContent from './components/AboutContent';
 import Particles from './components/Particles';
@@ -9,7 +8,6 @@ import '../styles/home.css';
 import { useGSAP } from '@gsap/react';
 import { gsap, ScrollTrigger } from '../lib/gsap';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
 import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -150,12 +148,15 @@ export default function Home() {
 
     const hasSeenBoot = window.sessionStorage.getItem('zzz-boot-seen');
     if (prefersReducedMotion || hasSeenBoot === '1') {
-      setBootSequenceVisible(false);
-      setBootProgress(100);
-      return undefined;
+      const frame = window.requestAnimationFrame(() => {
+        setBootSequenceVisible(false);
+        setBootProgress(100);
+      });
+
+      return () => window.cancelAnimationFrame(frame);
     }
 
-    setBootSequenceVisible(true);
+    const showFrame = window.requestAnimationFrame(() => setBootSequenceVisible(true));
     const progressSequence = [20, 42, 68, 100];
     const timers = progressSequence.map((value, index) =>
       window.setTimeout(() => setBootProgress(value), 220 + index * 260),
@@ -168,6 +169,7 @@ export default function Home() {
     }, 1500);
 
     return () => {
+      window.cancelAnimationFrame(showFrame);
       timers.forEach((timer) => window.clearTimeout(timer));
       window.clearTimeout(hideTimer);
     };
@@ -451,16 +453,54 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="text-center xl:text-left flex-1">
-                      <h1 className="text-4xl md:text-5xl font-bold neon-beat text-rose-100">
+                    <div className="text-center xl:text-left flex-1 space-y-4">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/50 bg-yellow-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-yellow-200">
+                        Graduate • Open to Opportunities
+                      </div>
+
+                      <h1 className="text-4xl md:text-5xl font-bold neon-beat text-rose-100 leading-tight">
                         Marlowe Ian Jumagbas
                       </h1>
-                      <p className="mt-3 text-lg md:text-xl text-white/85 tracking-wide">
-                        Full-Stack Developer
+
+                      <p className="text-lg md:text-xl text-white/85 tracking-wide">
+                        BSIT Graduate • Aspiring Developer • IT Enthusiast
                       </p>
-                      <p className="mt-4 max-w-xl text-sm md:text-base text-white/70 tracking-wide">
-                        Live a life you want, not burden by anything but to life fully..
+
+                      <p className="max-w-xl text-sm md:text-base text-white/70 tracking-wide leading-relaxed">
+                        I&apos;m a recent Information Technology graduate who is actively improving my programming
+                        skills, learning more about IT as a whole, and looking for opportunities to contribute,
+                        grow, and build meaningful solutions in the tech industry.
                       </p>
+
+                      <div className="flex flex-wrap justify-center xl:justify-start gap-2 pt-2">
+                        {['Web Development', 'Problem Solving', 'IT Growth', 'Software Learning'].map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/80"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-wrap justify-center xl:justify-start gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setActiveWindow('contact')}
+                          className="panel-button inline-flex items-center gap-2 px-4 py-2 bg-red-700/80 border border-red-400/70 text-white hover:bg-red-600/90"
+                        >
+                          <ContactMailRoundedIcon sx={{ fontSize: 16 }} />
+                          Let&apos;s Connect
+                        </button>
+                        <button
+                          type="button"
+                          onClick={openAboutModal}
+                          className="panel-button inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white/85 hover:bg-white/20"
+                        >
+                          <PersonRoundedIcon sx={{ fontSize: 16 }} />
+                          View Profile
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

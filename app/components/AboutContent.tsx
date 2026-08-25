@@ -206,17 +206,18 @@ export default function AboutContent({ mode = 'page', section = 'both' }: AboutC
                 <div className="flex items-start gap-4">
                   <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                   <p className="text-base leading-relaxed text-white/90">
-                    I am a 4th-year Bachelor of Science in Information Technology student at
-                    Saint Mary&apos;s University, Bayombong. As an aspiring IT professional, I am eager to
-                    gain hands-on experience and learn from real-world technology environments.
+                    I am a graduate of the Bachelor of Science in Information Technology at Saint Mary&apos;s
+                    University, Bayombong. I have completed my studies and am now focused on growing my
+                    skills, building real-world experience, and preparing for opportunities in the IT industry.
                   </p>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="w-3 h-3 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
                   <p className="text-base leading-relaxed text-white/90">
-                    I am currently exploring full-stack web development with technologies like React,
-                    Next.js, and Node.js. Motivated, adaptable, and committed to growing my skills through
-                    practical work and continuous learning.
+                    I am currently enhancing my programming skills in full-stack development, software
+                    engineering, and modern web technologies such as React, Next.js, and Node.js. I am also
+                    learning more about the broader IT landscape, including systems, workflows, and practical
+                    problem-solving in real-world environments.
                   </p>
                 </div>
               </div>
@@ -225,20 +226,20 @@ export default function AboutContent({ mode = 'page', section = 'both' }: AboutC
                 <h4 className="font-semibold text-white text-lg mb-4">Quick Overview</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="panel-card p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-                    <div className="text-2xl font-bold text-blue-600">4th</div>
-                    <div className="text-sm text-white/90">Year Level</div>
+                    <div className="text-2xl font-bold text-blue-600">BSIT</div>
+                    <div className="text-sm text-white/90">Graduate</div>
                   </div>
                   <div className="panel-card p-4 bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-                    <div className="text-2xl font-bold text-green-600">BSIT</div>
-                    <div className="text-sm text-white/90">Degree Program</div>
+                    <div className="text-2xl font-bold text-green-600">IT</div>
+                    <div className="text-sm text-white/90">Career Path</div>
                   </div>
                   <div className="panel-card p-4 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-                    <div className="text-2xl font-bold text-purple-600">SMU</div>
-                    <div className="text-sm text-white/90">University</div>
+                    <div className="text-2xl font-bold text-purple-600">Job</div>
+                    <div className="text-sm text-white/90">Seeker</div>
                   </div>
                   <div className="panel-card p-4 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
-                    <div className="text-2xl font-bold text-orange-600">2026</div>
-                    <div className="text-sm text-white/90">Expected Grad</div>
+                    <div className="text-2xl font-bold text-orange-600">Grow</div>
+                    <div className="text-sm text-white/90">Always Learning</div>
                   </div>
                 </div>
               </div>
@@ -267,9 +268,9 @@ export default function AboutContent({ mode = 'page', section = 'both' }: AboutC
                     <h5 className="text-base font-semibold text-rose-100">On-the-Job Training (OJT) Intern</h5>
                     <p className="text-sm text-rose-100/90">DICT Nueva Vizcaya Provincial Office</p>
                   </div>
-                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-800/60 border border-red-600/80 text-rose-100">Current</span>
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-800/60 border border-red-600/80 text-rose-100">Completed</span>
                 </div>
-                <p className="text-xs uppercase tracking-[0.2em] text-rose-200/80">Nueva Vizcaya • Present</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-rose-200/80">Nueva Vizcaya • Professional Experience</p>
                 <ul className="list-disc pl-5 space-y-1.5 text-sm text-rose-100/95 leading-relaxed">
                   <li>Assisting in day-to-day ICT support, documentation, and office technology tasks.</li>
                   <li>Applying academic knowledge to practical public-service technology workflows.</li>
