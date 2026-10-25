@@ -72,8 +72,8 @@ export const projects: Project[] = [
   {
     id: 4,
     name: 'Digital Management System',
-    description: 'TODO: Add the verified project description from the resume or project notes.',
-    skills: [],
+    description: 'On-premise platform for centralized guest, workstation, event, and report management across DICTcenters, with role-based administration, real-time PC monitoring, kiosk ticket validation, and restricted PC access.',
+    skills: ['React', 'Node.js', 'Express', 'MongoDB', 'Socket.IO', 'JWT', 'Docker', 'REST API', 'QRCode'],
     image: '/DTC_System.png',
   },
   {
