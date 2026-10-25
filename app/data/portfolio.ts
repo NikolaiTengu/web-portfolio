@@ -31,7 +31,7 @@ export const profile = {
   nickname: 'Ian / Xenon',
   role: 'Full-Stack Developer',
   subtitle: 'I build practical web systems with sharp interfaces, dependable APIs, and a growing command of the wider IT landscape.',
-  email: 'marloweianjumagbas@gmail.com',
+  email: 'jumagbasmarlowe@gmail.com',
   github: 'https://github.com/NikolaiTengu',
   linkedin: 'https://www.linkedin.com/in/marlowe-ian-jumagbas',
   availability: ['10:00 AM to 12:00 Noon', '6:00 PM to 7:00 PM'],
