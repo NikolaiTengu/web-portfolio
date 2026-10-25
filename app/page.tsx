@@ -752,8 +752,8 @@ export default function Home() {
                     </a>
                   </div>
                   
-                  <div className="panel-card p-4 bg-gradient-to-r from-yellow-50 to-orange-50">
-                    <div className="panel-header text-xs -m-4 mb-3 bg-gradient-to-r from-yellow-500 to-orange-600 inline-flex items-center gap-2">
+                  <div className="panel-card p-4 bg-gradient-to-r from-yellow-900/80 to-orange-950/80">
+                    <div className="panel-header text-xs -m-4 mb-3 bg-gradient-to-r from-yellow-700 to-orange-700 inline-flex items-center gap-2">
                       <WarningAmberRoundedIcon sx={{ fontSize: 16 }} /> Quick Note
                     </div>
                     <div className="mt-4">
