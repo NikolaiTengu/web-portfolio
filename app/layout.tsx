@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "../styles/globals.css";
 
-// XP-era fonts fallback
-const xpFonts = {
-  tahoma: "--font-tahoma",
-  msGothic: "--font-ms-gothic",
-};
+const instrument = localFont({ src: "./fonts/instrument-serif.woff2", variable: "--font-instrument" });
+const inter = localFont({ src: "./fonts/inter.woff2", variable: "--font-inter" });
+const jetbrains = localFont({ src: "./fonts/jetbrains-mono.woff2", variable: "--font-jetbrains" });
 
 export const metadata: Metadata = {
   title: "Marlowe Ian P. Jumagbas - Portfolio",
@@ -19,18 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            :root {
-              --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-              --font-jetbrains: 'JetBrains Mono', 'Monaco', 'Cascadia Code', monospace;
-            }
-          `
-        }} />
-      </head>
-      <body className="font-inter text-primary bg-surface-card">
+      <body className={`${instrument.variable} ${inter.variable} ${jetbrains.variable}`}>
         {children}
       </body>
     </html>
