@@ -15,7 +15,7 @@ export const aboutCopy: {
   ],
   focusAreas: ['Full-Stack Development', 'React.js', 'Node.js', 'Database Design', 'UI/UX Design', 'DevOps'],
   experience: {
-    title: 'On-the-Job Training (OJT) Intern',
+    title: 'Full Stack Developer Intern',
     organization: 'DICT Nueva Vizcaya Provincial Office',
     location: 'Nueva Vizcaya • Professional Experience',
     bullets: [
