@@ -69,6 +69,20 @@ export const projects: Project[] = [
     image: '/mdlab.png',
     collaboration: 'Collaborative project',
   },
+  {
+    id: 4,
+    name: 'Digital Management System',
+    description: 'TODO: Add the verified project description from the resume or project notes.',
+    skills: [],
+    image: '/DTC_System.png',
+  },
+  {
+    id: 5,
+    name: 'Eskora',
+    description: 'Kotlin mobile application that enables users to schedule tasks in a simple and efficient way without the complications of a calendar system like Google Calendar.',
+    skills: ['Kotlin', 'Android'],
+    image: '/Eskora.png',
+  },
 ];
 
 export const specializations: Specialization[] = [
@@ -81,7 +95,7 @@ export const specializations: Specialization[] = [
     summary: 'A practical builder focused on connecting interfaces, application logic, and data into useful full-stack experiences.',
     skills: ['React', 'Next.js', 'Node.js', 'Express', 'MongoDB'],
     coreSkills: ['React', 'Next.js', 'Node.js'],
-    metrics: [{ value: '3', label: 'featured projects' }, { value: '2', label: 'collaborative builds' }, { value: '1', label: 'personal build' }],
+    metrics: [{ value: '5', label: 'featured projects' }, { value: '2', label: 'collaborative builds' }, { value: '1', label: 'personal build' }],
     appliedIn: 'Noona Cafe',
   },
   {

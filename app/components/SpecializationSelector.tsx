@@ -31,7 +31,7 @@ export default function SpecializationSelector() {
       <div className="avatar-frame">
         <div className="avatar-glow glow-one" /><div className="avatar-glow glow-two" /><div className="avatar-glow glow-three" />
         <span className="arcana-number">{String(active + 1).padStart(2, '0')}</span>
-        <Image src="/me.png" alt={`${profile.name} portrait`} fill priority sizes="(max-width: 767px) 82vw, 42vw" className="avatar-image" />
+        <Image src="/Updated_Me.jpg" alt={`${profile.name} portrait`} fill priority sizes="(max-width: 767px) 82vw, 42vw" className="avatar-image" />
         <p className="arcana-caption">{current.arcana}</p>
       </div>
       <div className="glass hud summary-card">
